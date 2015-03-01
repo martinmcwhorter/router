@@ -114,6 +114,30 @@ define(["assert", 'route-recognizer'], function($__0,$__2) {
         self.navigating = false;
       }
     },
+    go: function(link, linkParams) {
+      var $__4 = this;
+      var self = this;
+      var parts = link.match(LINK_MICROSYNTAX_RE);
+      var routeName = parts[1];
+      var context = [{
+        handler: {component: routeName},
+        params: linkParams
+      }];
+      return this.canNavigate(context).then((function(status) {
+        return (status && $__4.activatePorts(context));
+      })).then(finishNavigating, cancelNavigating);
+      function startNavigating() {
+        self.context = context[0];
+        self.fullContext = context;
+        self.navigating = true;
+      }
+      function finishNavigating(childUrl) {
+        self.navigating = false;
+      }
+      function cancelNavigating() {
+        self.navigating = false;
+      }
+    },
     getCanonicalUrl: function(url) {
       forEach(this.rewrites, function(toUrl, fromUrl) {
         if (fromUrl === '/') {

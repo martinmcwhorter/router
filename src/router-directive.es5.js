@@ -112,9 +112,10 @@ function ngViewportDirective($animate, $compile, $controller, $templateRequest, 
           $router: scope.$$ngViewport.$$router = router.childRouter()
         };
 
-        if (router.context) {
-          locals.$routeParams = router.context.params;
-        }
+        // if (router.context) {
+        //   locals.$routeParams = router.context.params;
+        // }
+        locals.$routeParams = instruction[0].params;
         try {
           ctrl = $controller(controllerName, locals);
         } catch (e) {
@@ -209,7 +210,13 @@ function ngLinkDirective($router, $location, $parse) {
     if (target.attributes['ng-link']) {
       ev.preventDefault();
       var url = target.attributes.href.value;
-      rootRouter.navigate(url);
+
+      if (url && url != '.') {
+        rootRouter.navigate(url);
+      } else {
+        rootRouter.go(target.attributes['ng-link'].value,
+          $parse(target.attributes['ng-link-params'].value)());
+      }
     }
   });
 
@@ -244,6 +251,9 @@ function ngLinkDirective($router, $location, $parse) {
         }, function(params) {
           url = '.' + router.generate(routeName, params);
           elt.attr('href', url);
+          if (!url || url == '.') {
+            elt.attr('ng-link-params', JSON.stringify(params));
+          }
         }, true);
       }
     } else {

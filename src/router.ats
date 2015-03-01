@@ -182,6 +182,34 @@ export class Router {
     }
   }
 
+  go(link, linkParams) {
+
+    var self = this;
+
+    var parts = link.match(LINK_MICROSYNTAX_RE);
+    var routeName = parts[1];
+
+    var context = [{handler: {component: routeName}, params: linkParams}];
+
+    return this.canNavigate(context)
+               .then(status => (status && this.activatePorts(context)))
+               .then(finishNavigating, cancelNavigating);
+
+    function startNavigating() {
+      self.context = context[0];
+      self.fullContext = context;
+      self.navigating = true;
+    }
+
+    function finishNavigating(childUrl) {
+      self.navigating = false;
+    }
+
+    function cancelNavigating() {
+      self.navigating = false;
+    }
+  }
+
   getCanonicalUrl(url) {
     // TODO: normalize this
     forEach(this.rewrites, function (toUrl, fromUrl) {
